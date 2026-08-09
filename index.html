@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026 Sales Performance Dashboard</title>
+<link rel="stylesheet" href="styles.css?v=2">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brandblock">
+    <div class="logo">S</div>
+    <div>
+      <h1>2026 Sales Performance</h1>
+      <p class="sub">SMS CB Escalated Numbers &amp; Inbound Sales</p>
+    </div>
+  </div>
+  <div class="topmeta">
+    <span class="pill" id="dataStatus">loading…</span>
+    <span class="updated">Last Updated: <b id="lastUpdated">—</b></span>
+    <button class="btn" id="btnRefresh">↻ Refresh Data</button>
+  </div>
+</header>
+
+<nav class="tabs" id="nav">
+  <button class="tab active" data-page="overview">Sales Overview</button>
+  <button class="tab" data-page="smscb">SMS CB Escalated Numbers</button>
+  <button class="tab" data-page="inbound">Inbound Sales</button>
+</nav>
+
+<section class="filters">
+  <div class="fgroup">
+    <label>Month</label>
+    <select id="fMonth"></select>
+  </div>
+  <div class="fgroup">
+    <label>Week</label>
+    <select id="fWeek"></select>
+  </div>
+  <div class="fgroup">
+    <label>Quick Range</label>
+    <select id="fQuick">
+      <option value="all">All 2026</option>
+      <option value="cw">Current Week</option>
+      <option value="pw">Previous Week</option>
+      <option value="cm">Current Month</option>
+      <option value="custom">Custom Range</option>
+    </select>
+  </div>
+  <div class="fgroup" id="customWrap" hidden>
+    <label>From → To</label>
+    <div class="row2"><input type="date" id="fFrom"><input type="date" id="fTo"></div>
+  </div>
+  <div class="fgroup">
+    <label>Brand</label>
+    <select id="fBrand"></select>
+  </div>
+  <button class="btn ghost" id="btnReset">Reset Filters</button>
+  <span class="scope" id="scopeNote"></span>
+</section>
+
+<main>
+<!-- ================= OVERVIEW ================= -->
+<div class="page active" id="page-overview">
+  <div class="kpis" id="kpiOverview"></div>
+
+  <div class="card">
+    <div class="cardhead">
+      <h2>2026 Monthly Sales Overview</h2>
+      <div class="seg" id="ovMetric">
+        <button class="segbtn active" data-v="amt">Sales Amount</button>
+        <button class="segbtn" data-v="cnt"># of Sales</button>
+      </div>
+    </div>
+    <div class="chartbox" id="chOvMonthly"></div>
+    <p class="hint">Click legend items to show/hide series. Hover for exact values.</p>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="cardhead"><h2>SMS CB vs Inbound Comparison</h2>
+        <div class="seg" id="cmpBasis">
+          <button class="segbtn active" data-v="week">By Week</button>
+          <button class="segbtn" data-v="month">By Month</button>
+        </div>
+      </div>
+      <div class="chartbox" id="chCompare"></div>
+    </div>
+    <div class="card">
+      <div class="cardhead"><h2>Branch Share</h2></div>
+      <div class="chartbox" id="chBranchShare"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="cardhead">
+      <h2>Overall Brand Performance</h2>
+      <div class="seg" id="brandScope">
+        <button class="segbtn active" data-v="both">Both</button>
+        <button class="segbtn" data-v="SMS CB">SMS CB</button>
+        <button class="segbtn" data-v="Inbound">Inbound</button>
+      </div>
+    </div>
+    <div class="chartbox tall" id="chBrandBar"></div>
+    <div class="tscroll"><table class="tbl" id="tblBrands"></table></div>
+  </div>
+</div>
+
+<!-- ================= SMS CB ================= -->
+<div class="page" id="page-smscb">
+  <div class="kpis" id="kpiSms"></div>
+  <div class="card">
+    <div class="cardhead"><h2>Weekly Sales Comparison</h2></div>
+    <div class="chartbox" id="chSmsWeek"></div>
+  </div>
+  <div class="card">
+    <div class="cardhead"><h2>Monthly Sales &amp; Month-over-Month</h2></div>
+    <div class="chartbox" id="chSmsMonth"></div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="cardhead"><h2>Brand Sales Distribution</h2></div>
+      <div class="chartbox" id="chSmsPie"></div>
+      <div class="topbrand" id="topSms"></div>
+    </div>
+    <div class="card">
+      <div class="cardhead"><h2>Brand Ranking</h2></div>
+      <div class="tscroll"><table class="tbl" id="tblSms"></table></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= INBOUND ================= -->
+<div class="page" id="page-inbound">
+  <div class="kpis" id="kpiInb"></div>
+  <div class="card">
+    <div class="cardhead"><h2>Weekly Sales Comparison</h2></div>
+    <div class="chartbox" id="chInbWeek"></div>
+  </div>
+  <div class="card">
+    <div class="cardhead"><h2>Monthly Sales &amp; Month-over-Month</h2></div>
+    <div class="chartbox" id="chInbMonth"></div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="cardhead"><h2>Brand Sales Distribution</h2></div>
+      <div class="chartbox" id="chInbPie"></div>
+      <div class="topbrand" id="topInb"></div>
+    </div>
+    <div class="card">
+      <div class="cardhead"><h2>Brand Ranking</h2></div>
+      <div class="tscroll"><table class="tbl" id="tblInb"></table></div>
+    </div>
+  </div>
+</div>
+</main>
+
+<footer>Created by Danielle Ann Mari Crizaldo - Call Team Lead</footer>
+
+<script src="data.js?v=2"></script>
+<script src="app-core.js?v=2"></script>
+<script src="app-charts.js?v=2"></script>
+<script src="app-render.js?v=2"></script>
+<script src="app-init.js?v=2"></script>
+</body>
+</html>
