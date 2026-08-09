@@ -1,0 +1,39 @@
+name: Sync Sales Data
+
+on:
+  schedule:
+    - cron: '0 * * * *'      # hourly
+  workflow_dispatch:          # manual "Run workflow" button
+  push:
+    branches: [main]
+    paths: ['sync_sales.py']
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Pull Google Sheet and rebuild data.js
+        env:
+          SALES_SHEET: ${{ secrets.SALES_SHEET }}
+        run: python sync_sales.py
+
+      - name: Commit updated data
+        run: |
+          git config user.name  "sales-sync-bot"
+          git config user.email "actions@github.com"
+          if git diff --quiet -- data.js; then
+            echo "No data changes."
+          else
+            git add data.js
+            git commit -m "chore: auto-sync sales data $(date -u '+%Y-%m-%d %H:%M UTC')"
+            git push
+          fi
