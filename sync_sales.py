@@ -83,9 +83,11 @@ def build():
         idx = {h: i for i, h in enumerate(hdr) if h}
 
         c_brand = pick(idx, "brand")
-        # date fallback chain: callback date -> generic date -> escalated date -> week start
+        # date chain: callback date -> generic date -> escalated date.
+        # Week Start is deliberately NOT a fallback: it would shift a sale into
+        # the wrong month/week. A row with no real date is excluded instead.
         c_dates = [i for i in (pick(idx, "date of callback"), pick(idx, "date"),
-                               pick(idx, "date escalated"), pick(idx, "week start date"))
+                               pick(idx, "date escalated"))
                    if i is not None]
         c_ws = pick(idx, "week start date")
         c_we = pick(idx, "week end date")
