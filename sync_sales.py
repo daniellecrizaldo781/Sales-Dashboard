@@ -40,14 +40,18 @@ def norm(h):
     return " ".join(str(h).replace("\n", " ").replace("`", "").split()).strip().lower()
 
 
-DATE_FMTS = ("%d-%b-%y", "%d-%b-%Y", "%Y-%m-%d", "%m/%d/%Y", "%m/%d/%y",
-             "%d/%m/%Y", "%b %d, %Y", "%B %d, %Y", "%Y/%m/%d", "%d-%B-%y")
+DATE_FMTS = ("%d-%b-%y", "%d-%b-%Y", "%d-%B-%y", "%d-%B-%Y",
+             "%Y-%m-%d", "%m/%d/%Y", "%m/%d/%y", "%d/%m/%Y",
+             "%b %d, %Y", "%B %d, %Y", "%Y/%m/%d",
+             "%d %b %Y", "%d %B %Y")
 
 
 def to_date(v):
     s = str(v or "").strip()
     if not s:
         return None
+    s = " ".join(s.split())
+    for f in DATE_FMTS:
     for f in DATE_FMTS:
         try:
             return datetime.datetime.strptime(s, f).date()
