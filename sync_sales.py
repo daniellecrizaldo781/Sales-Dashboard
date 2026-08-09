@@ -13,7 +13,6 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 URL = "https://docs.google.com/spreadsheets/d/{}/export?format=csv&gid={}"
 YEAR = 2026
 
-
 def sheets_from_env():
     raw = os.environ.get("SALES_SHEET", "")
     parts = [p.strip() for p in raw.split("|") if p.strip()]
@@ -25,7 +24,6 @@ def sheets_from_env():
     sid, smscb, inbound = parts
     return sid, [("SMS CB", smscb), ("Inbound", inbound)]
 
-
 def fetch(sid, gid):
     req = urllib.request.Request(URL.format(sid, gid),
                                  headers={"User-Agent": "Mozilla/5.0"})
@@ -35,16 +33,13 @@ def fetch(sid, gid):
         raise RuntimeError("Google returned HTML, not CSV - sheet is not link-viewable.")
     return raw.decode("utf-8", errors="replace")
 
-
 def norm(h):
     return " ".join(str(h).replace("\n", " ").replace("`", "").split()).strip().lower()
-
 
 DATE_FMTS = ("%d-%b-%y", "%d-%b-%Y", "%d-%B-%y", "%d-%B-%Y",
              "%Y-%m-%d", "%m/%d/%Y", "%m/%d/%y", "%d/%m/%Y",
              "%b %d, %Y", "%B %d, %Y", "%Y/%m/%d",
              "%d %b %Y", "%d %B %Y")
-
 
 def to_date(v):
     s = str(v or "").strip()
@@ -52,13 +47,11 @@ def to_date(v):
         return None
     s = " ".join(s.split())
     for f in DATE_FMTS:
-    for f in DATE_FMTS:
         try:
             return datetime.datetime.strptime(s, f).date()
         except ValueError:
             pass
     return None
-
 
 def to_money(v):
     s = str(v or "").strip().replace("$", "").replace(",", "").replace("(", "-").replace(")", "")
@@ -69,13 +62,11 @@ def to_money(v):
     except ValueError:
         return 0.0
 
-
 def pick(idx, *names):
     for n in names:
         if n in idx:
             return idx[n]
     return None
-
 
 def build():
     sid, tabs = sheets_from_env()
@@ -161,7 +152,6 @@ def build():
     print("OK  %d sales  $%.2f  issues=%s" %
           (len(records), sum(r["amt"] for r in records), issues))
     print("wrote", out)
-
 
 if __name__ == "__main__":
     try:
