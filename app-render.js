@@ -44,6 +44,41 @@
       kpiCard('c1', 'Year-to-Date Sales', P.money(P.sum(P.raw)), P.num(P.raw.length) + ' orders (unfiltered 2026)');
   };
 
+  function previousWeekRows(rows) {
+    const last = lastOf(rows); if (!last) return [];
+    const cur = P.weekStart(last);
+    const wks = [...new Set(rows.map(r => r.ws))].filter(Boolean).sort();
+    const i = wks.indexOf(cur);
+    return i > 0 ? rows.filter(r => r.ws === wks[i - 1]) : [];
+  }
+  function previousWeekLabel(rows) {
+    const last = lastOf(rows); if (!last) return '';
+    const cur = P.weekStart(last);
+    const wks = [...new Set(rows.map(r => r.ws))].filter(Boolean).sort();
+    const i = wks.indexOf(cur);
+    return i > 0 ? P.weekLabel(wks[i - 1]) : '';
+  }
+  function previousMonthRows(rows) {
+    const last = lastOf(rows); if (!last) return [];
+    const cm = P.ymd(last).getMonth() + 1;
+    const months = [...new Set(rows.map(r => r.m))].sort((a, b) => a - b);
+    const i = months.indexOf(cm);
+    return i > 0 ? rows.filter(r => r.m === months[i - 1]) : [];
+  }
+  function previousMonthLabel(rows) {
+    const last = lastOf(rows); if (!last) return '';
+    const cm = P.ymd(last).getMonth() + 1;
+    const months = [...new Set(rows.map(r => r.m))].sort((a, b) => a - b);
+    const i = months.indexOf(cm);
+    return i > 0 ? P.MONTHS[months[i - 1] - 1] : '';
+  }
+  function topBrandOf(rows) {
+    if (!rows.length) return null;
+    const m = new Map();
+    rows.forEach(r => m.set(r.b, (m.get(r.b) || 0) + r.amt));
+    return [...m.entries()].sort((x, y) => y[1] - x[1])[0];
+  }
+
   /* ---------- CHANNEL KPIs ---------- */
   P.renderChannelKpis = function (elId, rows) {
     const brands = P.brandRank(rows);
@@ -52,19 +87,72 @@
     let bestWeekIdx = -1, bestWeekVal = -1;
     w.amt.forEach((v, i) => { if (v > bestWeekVal) { bestWeekVal = v; bestWeekIdx = i; } });
     const cw = currentWeekRows(rows), cm = currentMonthRows(rows);
+    const pw = previousWeekRows(rows), pm = previousMonthRows(rows);
     const avgWeek = w.amt.length ? P.sum(rows) / w.amt.length : 0;
+    const pwTop = topBrandOf(pw);
+    const trend = (now, prev) => {
+      if (!prev) return '';
+      const d = ((now - prev) / prev) * 100;
+      return ` <span class="${d >= 0 ? 'up' : 'down'}">${d >= 0 ? '▲' : '▼'} ${Math.abs(d).toFixed(1)}%</span>`;
+    };
 
     $(elId).innerHTML =
       kpiCard('c1', 'Total Sales (count)', P.num(rows.length), 'Orders in scope') +
       kpiCard('c2', 'Total Sales Amount', P.money(P.sum(rows)), '') +
-      kpiCard('c3', 'Current Week Sales', P.money(P.sum(cw)), P.num(cw.length) + ' orders') +
-      kpiCard('c4', 'Current Month Sales', P.money(P.sum(cm)), P.num(cm.length) + ' orders') +
+      kpiCard('c3', 'Current Week Sales', P.money(P.sum(cw)),
+              P.num(cw.length) + ' orders' + trend(P.sum(cw), P.sum(pw))) +
+      kpiCard('c4', 'Previous Week Sales', P.money(P.sum(pw)),
+              pw.length ? P.num(pw.length) + ' orders • ' + previousWeekLabel(rows) : 'no prior week') +
+      kpiCard('c5', 'Top Brand — Previous Week', pwTop ? pwTop[0] : '—',
+              pwTop ? P.money(pwTop[1]) : 'no sales') +
+      kpiCard('c4', 'Current Month Sales', P.money(P.sum(cm)),
+              P.num(cm.length) + ' orders' + trend(P.sum(cm), P.sum(pm))) +
+      kpiCard('c3', 'Previous Month Sales', P.money(P.sum(pm)),
+              pm.length ? P.num(pm.length) + ' orders • ' + previousMonthLabel(rows) : 'no prior month') +
       kpiCard('c5', 'Average Weekly Sales', P.money(avgWeek), w.amt.length + ' active weeks') +
       kpiCard('c6', 'Best Performing Brand', top ? top.brand : '—',
               top ? P.money(top.amt) + ' • ' + P.pct(top.share) : '') +
       kpiCard('c2', 'Best Performing Week',
               bestWeekIdx >= 0 ? 'Week ' + (bestWeekIdx + 1) : '—',
               bestWeekIdx >= 0 ? w.labels[bestWeekIdx] + ' • ' + P.money(bestWeekVal) : '');
+  };
+
+  /* ---------- week vs week delta cards ---------- */
+  P.renderWeekDelta = function (elId, rowsA, rowsB, labA, labB) {
+    const el = $(elId); if (!el) return;
+    const aAmt = P.sum(rowsA), bAmt = P.sum(rowsB);
+    const dAmt = bAmt - aAmt, dCnt = rowsB.length - rowsA.length;
+    const pctTxt = (d, base) => {
+      if (!base) return d ? 'new' : 'no change';
+      const v = (d / base) * 100;
+      return (v >= 0 ? '▲ ' : '▼ ') + Math.abs(v).toFixed(1) + '%';
+    };
+    const cls = d => d > 0 ? 'up' : d < 0 ? 'down' : '';
+    const avgA = rowsA.length ? aAmt / rowsA.length : 0;
+    const avgB = rowsB.length ? bAmt / rowsB.length : 0;
+    const topOf = rows => {
+      if (!rows.length) return null;
+      const m = new Map();
+      rows.forEach(r => m.set(r.b, (m.get(r.b) || 0) + r.amt));
+      return [...m.entries()].sort((x, y) => y[1] - x[1])[0];
+    };
+    const tA = topOf(rowsA), tB = topOf(rowsB);
+    el.innerHTML =
+      kpiCard('c1', labA, P.money(aAmt), P.num(rowsA.length) + ' orders') +
+      kpiCard('c2', labB, P.money(bAmt), P.num(rowsB.length) + ' orders') +
+      `<div class="kpi c4"><div class="lbl">Change in Sales</div>
+        <div class="val ${cls(dAmt)}">${dAmt >= 0 ? '+' : '−'}${P.money(Math.abs(dAmt))}</div>
+        <div class="note ${cls(dAmt)}">${pctTxt(dAmt, aAmt)}</div></div>` +
+      `<div class="kpi c5"><div class="lbl">Change in Orders</div>
+        <div class="val ${cls(dCnt)}">${dCnt >= 0 ? '+' : '−'}${P.num(Math.abs(dCnt))}</div>
+        <div class="note ${cls(dCnt)}">${pctTxt(dCnt, rowsA.length)}</div></div>` +
+      `<div class="kpi c3"><div class="lbl">Avg Order Value</div>
+        <div class="val">${P.money(avgB)}</div>
+        <div class="note ${cls(avgB - avgA)}">vs ${P.money(avgA)}</div></div>` +
+      kpiCard('c6', 'Top Brand — ' + labA, tA ? tA[0] : '—',
+              tA ? P.money(tA[1]) : 'no sales') +
+      kpiCard('c1', 'Top Brand — ' + labB, tB ? tB[0] : '—',
+              tB ? P.money(tB[1]) : 'no sales');
   };
 
   /* ---------- brand table ---------- */
