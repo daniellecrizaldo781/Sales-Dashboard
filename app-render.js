@@ -44,77 +44,13 @@
       kpiCard('c1', 'Year-to-Date Sales', P.money(P.sum(P.raw)), P.num(P.raw.length) + ' orders (unfiltered 2026)');
   };
 
-  function previousWeekRows(rows) {
-    const last = lastOf(rows); if (!last) return [];
-    const cur = P.weekStart(last);
-    const wks = [...new Set(rows.map(r => r.ws))].filter(Boolean).sort();
-    const i = wks.indexOf(cur);
-    return i > 0 ? rows.filter(r => r.ws === wks[i - 1]) : [];
-  }
-  function previousWeekLabel(rows) {
-    const last = lastOf(rows); if (!last) return '';
-    const cur = P.weekStart(last);
-    const wks = [...new Set(rows.map(r => r.ws))].filter(Boolean).sort();
-    const i = wks.indexOf(cur);
-    return i > 0 ? P.weekLabel(wks[i - 1]) : '';
-  }
-  function previousMonthRows(rows) {
-    const last = lastOf(rows); if (!last) return [];
-    const cm = P.ymd(last).getMonth() + 1;
-    const months = [...new Set(rows.map(r => r.m))].sort((a, b) => a - b);
-    const i = months.indexOf(cm);
-    return i > 0 ? rows.filter(r => r.m === months[i - 1]) : [];
-  }
-  function previousMonthLabel(rows) {
-    const last = lastOf(rows); if (!last) return '';
-    const cm = P.ymd(last).getMonth() + 1;
-    const months = [...new Set(rows.map(r => r.m))].sort((a, b) => a - b);
-    const i = months.indexOf(cm);
-    return i > 0 ? P.MONTHS[months[i - 1] - 1] : '';
-  }
-  function topBrandOf(rows) {
-    if (!rows.length) return null;
-    const m = new Map();
-    rows.forEach(r => m.set(r.b, (m.get(r.b) || 0) + r.amt));
-    return [...m.entries()].sort((x, y) => y[1] - x[1])[0];
-  }
-
   /* ---------- CHANNEL KPIs ---------- */
   P.renderChannelKpis = function (elId, rows) {
-    const brands = P.brandRank(rows);
-    const top = brands[0];
-    const w = P.weekSeries(rows);
-    let bestWeekIdx = -1, bestWeekVal = -1;
-    w.amt.forEach((v, i) => { if (v > bestWeekVal) { bestWeekVal = v; bestWeekIdx = i; } });
-    const cw = currentWeekRows(rows), cm = currentMonthRows(rows);
-    const pw = previousWeekRows(rows), pm = previousMonthRows(rows);
-    const avgWeek = w.amt.length ? P.sum(rows) / w.amt.length : 0;
-    const pwTop = topBrandOf(pw);
-    const trend = (now, prev) => {
-      if (!prev) return '';
-      const d = ((now - prev) / prev) * 100;
-      return ` <span class="${d >= 0 ? 'up' : 'down'}">${d >= 0 ? '▲' : '▼'} ${Math.abs(d).toFixed(1)}%</span>`;
-    };
-
+    const cw = currentWeekRows(rows);
     $(elId).innerHTML =
       kpiCard('c1', 'Total Sales (count)', P.num(rows.length), 'Orders in scope') +
       kpiCard('c2', 'Total Sales Amount', P.money(P.sum(rows)), '') +
-      kpiCard('c3', 'Current Week Sales', P.money(P.sum(cw)),
-              P.num(cw.length) + ' orders' + trend(P.sum(cw), P.sum(pw))) +
-      kpiCard('c4', 'Previous Week Sales', P.money(P.sum(pw)),
-              pw.length ? P.num(pw.length) + ' orders • ' + previousWeekLabel(rows) : 'no prior week') +
-      kpiCard('c5', 'Top Brand — Previous Week', pwTop ? pwTop[0] : '—',
-              pwTop ? P.money(pwTop[1]) : 'no sales') +
-      kpiCard('c4', 'Current Month Sales', P.money(P.sum(cm)),
-              P.num(cm.length) + ' orders' + trend(P.sum(cm), P.sum(pm))) +
-      kpiCard('c3', 'Previous Month Sales', P.money(P.sum(pm)),
-              pm.length ? P.num(pm.length) + ' orders • ' + previousMonthLabel(rows) : 'no prior month') +
-      kpiCard('c5', 'Average Weekly Sales', P.money(avgWeek), w.amt.length + ' active weeks') +
-      kpiCard('c6', 'Best Performing Brand', top ? top.brand : '—',
-              top ? P.money(top.amt) + ' • ' + P.pct(top.share) : '') +
-      kpiCard('c2', 'Best Performing Week',
-              bestWeekIdx >= 0 ? 'Week ' + (bestWeekIdx + 1) : '—',
-              bestWeekIdx >= 0 ? w.labels[bestWeekIdx] + ' • ' + P.money(bestWeekVal) : '');
+      kpiCard('c3', 'Current Sales Amount', P.money(P.sum(cw)), P.num(cw.length) + ' orders this week');
   };
 
   /* ---------- week vs week delta cards ---------- */
