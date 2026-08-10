@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>2026 Sales Performance Dashboard</title>
-<link rel="stylesheet" href="styles.css?v=2">
+<link rel="stylesheet" href="styles.css?v=4">
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
 </head>
 <body>
@@ -46,12 +46,7 @@
       <option value="cw">Current Week</option>
       <option value="pw">Previous Week</option>
       <option value="cm">Current Month</option>
-      <option value="custom">Custom Range</option>
     </select>
-  </div>
-  <div class="fgroup" id="customWrap" hidden>
-    <label>From → To</label>
-    <div class="row2"><input type="date" id="fFrom"><input type="date" id="fTo"></div>
   </div>
   <div class="fgroup">
     <label>Brand</label>
@@ -78,9 +73,24 @@
     <p class="hint">Click legend items to show/hide series. Hover for exact values.</p>
   </div>
 
+  <div class="card">
+    <div class="cardhead">
+      <h2>Week vs Week Comparison</h2>
+      <div class="wkcmp">
+        <select id="wkA" class="wksel"></select>
+        <span class="vs">vs</span>
+        <select id="wkB" class="wksel"></select>
+      </div>
+    </div>
+    <div class="kpis wkstats" id="wkDelta"></div>
+    <div class="chartbox" id="chWeekVsWeek"></div>
+    <p class="hint">Pick any two weeks to compare totals, order counts and brand mix.</p>
+  </div>
+
   <div class="grid2">
     <div class="card">
-      <div class="cardhead"><h2>SMS CB vs Inbound Comparison</h2>
+      <div class="cardhead">
+        <h2>SMS CB vs Inbound Comparison</h2>
         <div class="seg" id="cmpBasis">
           <button class="segbtn active" data-v="week">By Week</button>
           <button class="segbtn" data-v="month">By Month</button>
@@ -112,11 +122,27 @@
 <div class="page" id="page-smscb">
   <div class="kpis" id="kpiSms"></div>
   <div class="card">
-    <div class="cardhead"><h2>Weekly Sales Comparison</h2></div>
+    <div class="cardhead">
+      <h2>Weekly Sales Comparison</h2>
+      <div class="wkcmp">
+        <select id="smsWkA" class="wksel"></select>
+        <span class="vs">vs</span>
+        <select id="smsWkB" class="wksel"></select>
+      </div>
+    </div>
+    <div class="kpis wkstats" id="smsWkDelta"></div>
     <div class="chartbox" id="chSmsWeek"></div>
   </div>
   <div class="card">
-    <div class="cardhead"><h2>Monthly Sales &amp; Month-over-Month</h2></div>
+    <div class="cardhead">
+      <h2>Monthly Sales &amp; Month-over-Month</h2>
+      <div class="wkcmp">
+        <select id="smsMoA" class="wksel"></select>
+        <span class="vs">vs</span>
+        <select id="smsMoB" class="wksel"></select>
+      </div>
+    </div>
+    <div class="kpis wkstats" id="smsMoDelta"></div>
     <div class="chartbox" id="chSmsMonth"></div>
   </div>
   <div class="grid2">
@@ -136,11 +162,27 @@
 <div class="page" id="page-inbound">
   <div class="kpis" id="kpiInb"></div>
   <div class="card">
-    <div class="cardhead"><h2>Weekly Sales Comparison</h2></div>
+    <div class="cardhead">
+      <h2>Weekly Sales Comparison</h2>
+      <div class="wkcmp">
+        <select id="inbWkA" class="wksel"></select>
+        <span class="vs">vs</span>
+        <select id="inbWkB" class="wksel"></select>
+      </div>
+    </div>
+    <div class="kpis wkstats" id="inbWkDelta"></div>
     <div class="chartbox" id="chInbWeek"></div>
   </div>
   <div class="card">
-    <div class="cardhead"><h2>Monthly Sales &amp; Month-over-Month</h2></div>
+    <div class="cardhead">
+      <h2>Monthly Sales &amp; Month-over-Month</h2>
+      <div class="wkcmp">
+        <select id="inbMoA" class="wksel"></select>
+        <span class="vs">vs</span>
+        <select id="inbMoB" class="wksel"></select>
+      </div>
+    </div>
+    <div class="kpis wkstats" id="inbMoDelta"></div>
     <div class="chartbox" id="chInbMonth"></div>
   </div>
   <div class="grid2">
@@ -159,10 +201,10 @@
 
 <footer>Created by Danielle Ann Mari Crizaldo - Call Team Lead</footer>
 
-<script src="data.js?v=2"></script>
-<script src="app-core.js?v=2"></script>
-<script src="app-charts.js?v=2"></script>
-<script src="app-render.js?v=2"></script>
-<script src="app-init.js?v=2"></script>
+<script src="data.js?v=4"></script>
+<script src="app-core.js?v=4"></script>
+<script src="app-charts.js?v=4"></script>
+<script src="app-render.js?v=4"></script>
+<script src="app-init.js?v=4"></script>
 </body>
 </html>
