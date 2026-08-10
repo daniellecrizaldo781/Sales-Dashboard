@@ -239,6 +239,62 @@
     });
   };
 
+  /* ---------- week vs week ---------- */
+  P.chartWeekVsWeek = function (id, rowsA, rowsB, labA, labB) {
+    const c = get(id); if (!c) return;
+    if (!rowsA.length && !rowsB.length) return empty(id);
+    const brands = [...new Set([...rowsA, ...rowsB].map(r => r.b))];
+    const sumB = (rows, b) => +rows.filter(r => r.b === b)
+      .reduce((a, r) => a + r.amt, 0).toFixed(2);
+    const ranked = brands
+      .map(b => ({ b, a: sumB(rowsA, b), c: sumB(rowsB, b) }))
+      .sort((x, y) => (y.a + y.c) - (x.a + x.c))
+      .slice(0, 10);
+    const cats = ['SMS CB', 'Inbound', ...ranked.map(r => r.b)];
+    const chSum = (rows, ch) => +rows.filter(r => r.ch === ch)
+      .reduce((a, r) => a + r.amt, 0).toFixed(2);
+    const dA = [chSum(rowsA, 'SMS CB'), chSum(rowsA, 'Inbound'), ...ranked.map(r => r.a)];
+    const dB = [chSum(rowsB, 'SMS CB'), chSum(rowsB, 'Inbound'), ...ranked.map(r => r.c)];
+    c.clear();
+    c.setOption({
+      tooltip: { ...tip, valueFormatter: P.money },
+      legend: { ...legend, data: [labA, labB] },
+      grid: { left: 10, right: 18, bottom: 8, top: 46, containLabel: true },
+      xAxis: catAxis(cats, cats.some(s => s.length > 10) ? 22 : 0),
+      yAxis: moneyAxis('Sales amount'),
+      series: [
+        bar('#E48FB1', labA, dA),
+        bar('#A98FE0', labB, dB)
+      ]
+    });
+  };
+
+  /* ---------- month vs month ---------- */
+  P.chartMonthVsMonth = function (id, rowsA, rowsB, labA, labB) {
+    const c = get(id); if (!c) return;
+    if (!rowsA.length && !rowsB.length) return empty(id);
+    const brands = [...new Set([...rowsA, ...rowsB].map(r => r.b))];
+    const sB = (rows, b) => +rows.filter(r => r.b === b)
+      .reduce((a, r) => a + r.amt, 0).toFixed(2);
+    const ranked = brands
+      .map(b => ({ b, a: sB(rowsA, b), c: sB(rowsB, b) }))
+      .sort((x, y) => (y.a + y.c) - (x.a + x.c))
+      .slice(0, 10);
+    const cats = ['Total', ...ranked.map(r => r.b)];
+    const tot = rows => +rows.reduce((a, r) => a + r.amt, 0).toFixed(2);
+    const dA = [tot(rowsA), ...ranked.map(r => r.a)];
+    const dB = [tot(rowsB), ...ranked.map(r => r.c)];
+    c.clear();
+    c.setOption({
+      tooltip: { ...tip, valueFormatter: P.money },
+      legend: { ...legend, data: [labA, labB] },
+      grid: { left: 10, right: 18, bottom: 8, top: 46, containLabel: true },
+      xAxis: catAxis(cats, cats.some(s => s.length > 10) ? 22 : 0),
+      yAxis: moneyAxis('Sales amount'),
+      series: [bar('#E48FB1', labA, dA), bar('#A98FE0', labB, dB)]
+    });
+  };
+
   /* ---------- brand donut ---------- */
   P.chartBrandPie = function (id, ranked) {
     const c = get(id); if (!c) return;
