@@ -111,6 +111,26 @@ main{padding:20px 24px 40px}
 }
 .segbtn.active{background:var(--white);color:var(--ink);box-shadow:var(--shadow)}
 
+/* week-vs-week pill selectors */
+.wkcmp{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.wksel{
+  appearance:none;-webkit-appearance:none;
+  border:1.5px solid var(--pink);border-radius:999px;background:var(--white);
+  color:var(--ink);font-size:13px;font-weight:600;font-family:inherit;
+  padding:8px 32px 8px 16px;cursor:pointer;width:auto;min-width:150px;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' fill='none' stroke='%233A3350' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat:no-repeat;background-position:right 13px center;
+  transition:border-color .15s, box-shadow .15s;
+}
+.wksel:hover{border-color:var(--pink-d)}
+.wksel:focus{outline:none;border-color:var(--lav-d);box-shadow:0 0 0 3px rgba(169,143,224,.18)}
+.wkcmp .vs{color:var(--lav-d);font-size:13px;font-weight:600}
+.wkstats{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin:4px 0 14px}
+.wkstats .kpi{padding:12px 14px}
+.wkstats .kpi .val{font-size:19px}
+.up{color:#2F8B5F}
+.down{color:#C2415F}
+
 .topbrand{
   margin-top:10px;padding:12px 16px;border-radius:12px;
   background:linear-gradient(135deg,var(--yellow),var(--peach));font-weight:600;font-size:13.5px;
