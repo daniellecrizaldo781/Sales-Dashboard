@@ -4,7 +4,7 @@ window.APP = (function () {
   P.raw = [];        // all validated rows
   P.rows = [];       // rows after filters
   P.meta = {};
-  P.state = { month: 'all', week: 'all', quick: 'all', from: '', to: '', brand: 'all' };
+  P.state = { month: 'all', week: 'all', quick: 'all', brand: 'all' };
 
   const MONTHS = ['January','February','March','April','May','June',
                   'July','August','September','October','November','December'];
@@ -84,7 +84,6 @@ window.APP = (function () {
       from = w; to = P.weekEnd(w);
     }
     else if (s.quick === 'cm' && last) { const m = ymd(last).getMonth() + 1; s.month = String(m); }
-    else if (s.quick === 'custom') { from = s.from || null; to = s.to || null; }
 
     P.rows = P.raw.filter(r => {
       if (s.month !== 'all' && r.m !== +s.month) return false;
@@ -104,7 +103,6 @@ window.APP = (function () {
     if (s.week !== 'all') bits.push('Week of ' + P.weekLabel(s.week));
     if (s.quick === 'cw') bits.push('Current week');
     if (s.quick === 'pw') bits.push('Previous week');
-    if (s.quick === 'custom' && (s.from || s.to)) bits.push((s.from || '…') + ' → ' + (s.to || '…'));
     if (s.brand !== 'all') bits.push('Brand: ' + s.brand);
     return 'Showing: ' + bits.join(' • ') + ' — ' + P.num(P.rows.length) + ' sales, ' +
            P.money(P.sum(P.rows)) + '.';
